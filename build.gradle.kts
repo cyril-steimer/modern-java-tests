@@ -15,10 +15,15 @@ subprojects {
         plugin("java")
     }
 
+    java {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
     group = "ch.ergon.modern.java"
     version = "1.0"
-    
-    dependencies { 
+
+    dependencies {
         testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = junitVersion)
         testRuntimeOnly(group = "org.junit.jupiter", name = "junit-jupiter-engine", version = junitVersion)
     }

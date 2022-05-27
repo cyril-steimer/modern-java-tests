@@ -20,6 +20,10 @@ subprojects {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    tasks.withType(JavaCompile::class) {
+        options.compilerArgs.add("--enable-preview")
+    }
+
     group = "ch.ergon.modern.java"
     version = "1.0"
 
@@ -30,5 +34,6 @@ subprojects {
 
     tasks.test {
         useJUnitPlatform()
+        jvmArgs = listOf("--enable-preview")
     }
 }

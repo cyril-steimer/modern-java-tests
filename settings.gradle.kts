@@ -1,3 +1,3 @@
 rootProject.name = "modern-java-tests"
 
-include("api", "impl")
+include("api", "impl", "client")

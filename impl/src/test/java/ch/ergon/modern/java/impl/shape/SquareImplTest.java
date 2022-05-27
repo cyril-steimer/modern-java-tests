@@ -2,8 +2,7 @@ package ch.ergon.modern.java.impl.shape;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SquareImplTest {
 
@@ -21,5 +20,11 @@ public class SquareImplTest {
 
         assertEquals(square1, square2);
         assertNotEquals(square1, square3);
+    }
+
+    @Test
+    public void testInvalidSquares() {
+        assertThrows(IllegalArgumentException.class, () -> new SquareImpl(0.0));
+        assertThrows(IllegalArgumentException.class, () -> new SquareImpl(-1.0));
     }
 }

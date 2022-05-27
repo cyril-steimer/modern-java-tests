@@ -2,8 +2,7 @@ package ch.ergon.modern.java.impl.shape;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CircleImplTest {
 
@@ -21,5 +20,11 @@ public class CircleImplTest {
 
         assertEquals(circle1, circle2);
         assertNotEquals(circle1, circle3);
+    }
+
+    @Test
+    public void testInvalidCircles() {
+        assertThrows(IllegalArgumentException.class, () -> new CircleImpl(0.0));
+        assertThrows(IllegalArgumentException.class, () -> new CircleImpl(-1.0));
     }
 }

@@ -24,6 +24,11 @@ subprojects {
         options.compilerArgs.add("--enable-preview")
     }
 
+    // To ensure that we can run main methods from the IDE
+    tasks.withType(JavaExec::class) {
+        jvmArgs = listOf("--enable-preview")
+    }
+
     group = "ch.ergon.modern.java"
     version = "1.0"
 

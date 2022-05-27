@@ -16,13 +16,13 @@ public class RectangleImplTest {
     @Test
     public void testWidth() {
         var rectangle = new RectangleImpl(10.0, 5.0);
-        assertEquals(10.0, rectangle.getWidth());
+        assertEquals(10.0, rectangle.width());
     }
 
     @Test
     public void testHeight() {
         var rectangle = new RectangleImpl(10.0, 5.0);
-        assertEquals(5.0, rectangle.getHeight());
+        assertEquals(5.0, rectangle.height());
     }
 
     @Test

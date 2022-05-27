@@ -21,7 +21,7 @@ public class ShapeAlgorithmsTest {
 
         assertNotSame(original, copy);
         assertEquals(original, copy);
-        assertEquals(10.0, copy.getSide());
+        assertEquals(10.0, copy.side());
     }
 
     @Test
@@ -31,7 +31,7 @@ public class ShapeAlgorithmsTest {
 
         assertNotSame(original, copy);
         assertEquals(original, copy);
-        assertEquals(5.0, copy.getRadius());
+        assertEquals(5.0, copy.radius());
     }
 
     @Test
@@ -41,8 +41,8 @@ public class ShapeAlgorithmsTest {
 
         assertNotSame(original, copy);
         assertEquals(original, copy);
-        assertEquals(1.0, copy.getWidth());
-        assertEquals(2.0, copy.getHeight());
+        assertEquals(1.0, copy.width());
+        assertEquals(2.0, copy.height());
     }
 
     @Test
@@ -66,7 +66,7 @@ public class ShapeAlgorithmsTest {
         var original = factory.createRectangle(5.0, 5.0);
         var simplified = assertInstanceOf(Square.class, algorithms.simplify(original));
 
-        assertEquals(5.0, simplified.getSide());
+        assertEquals(5.0, simplified.side());
     }
 
     @Test

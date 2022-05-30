@@ -1,5 +1,8 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     java
+    kotlin("jvm") version "1.6.21"
 }
 
 val junitVersion = "5.8.1"
@@ -13,6 +16,7 @@ allprojects {
 subprojects {
     apply {
         plugin("java")
+        plugin("kotlin")
     }
 
     java {
@@ -20,12 +24,24 @@ subprojects {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    tasks.withType(JavaCompile::class) {
+    tasks.withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = "17" // Ensure that Kotlin also targets the correct JVM (important for modules)
+    }
+
+    // https://stackoverflow.com/a/47669720
+    tasks.compileKotlin {
+        destinationDirectory.set(tasks.compileJava.get().destinationDirectory.get())
+    }
+    tasks.compileTestKotlin {
+        destinationDirectory.set(tasks.compileTestJava.get().destinationDirectory.get())
+    }
+
+    tasks.withType<JavaCompile> {
         options.compilerArgs.add("--enable-preview")
     }
 
     // To ensure that we can run main methods from the IDE
-    tasks.withType(JavaExec::class) {
+    tasks.withType<JavaExec> {
         jvmArgs = listOf("--enable-preview")
     }
 

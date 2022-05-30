@@ -19,3 +19,11 @@ enum class UnaryOperator {
 data class UnaryFormula(val operator: UnaryOperator, val formula: Formula) : Formula
 
 data class Constant(val value: Double) : Formula
+
+operator fun Formula.plus(other: Formula) = BinaryFormula(this, BinaryOperator.ADD, other)
+operator fun Formula.minus(other: Formula) = BinaryFormula(this, BinaryOperator.SUBTRACT, other)
+operator fun Formula.times(other: Formula) = BinaryFormula(this, BinaryOperator.MULTIPLY, other)
+operator fun Formula.div(other: Formula) = BinaryFormula(this, BinaryOperator.DIVIDE, other)
+
+operator fun Formula.unaryMinus() = UnaryFormula(UnaryOperator.MINUS, this)
+operator fun Formula.unaryPlus() = UnaryFormula(UnaryOperator.PLUS, this)

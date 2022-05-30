@@ -11,22 +11,22 @@ class FormulaEvaluatorTest {
 
     @Test
     fun testEvaluateSimpleBinaryFormula() {
-        val add = BinaryFormula(positiveConstant, BinaryOperator.ADD, negativeConstant)
+        val add = positiveConstant + negativeConstant
         assertEquals(-10.0, add.evaluate())
-        val subtract = BinaryFormula(positiveConstant, BinaryOperator.SUBTRACT, negativeConstant)
+        val subtract = positiveConstant - negativeConstant
         assertEquals(30.0, subtract.evaluate())
-        val multiply = BinaryFormula(positiveConstant, BinaryOperator.MULTIPLY, negativeConstant)
+        val multiply = positiveConstant * negativeConstant
         assertEquals(-200.0, multiply.evaluate())
-        val divide = BinaryFormula(positiveConstant, BinaryOperator.DIVIDE, negativeConstant)
+        val divide = positiveConstant / negativeConstant
         assertEquals(-0.5, divide.evaluate())
     }
 
 
     @Test
     fun testEvaluateSimpleUnaryFormula() {
-        val plus = UnaryFormula(UnaryOperator.PLUS, positiveConstant)
+        val plus = +positiveConstant
         assertEquals(10.0, plus.evaluate())
-        val minus = UnaryFormula(UnaryOperator.MINUS, negativeConstant)
+        val minus = -negativeConstant
         assertEquals(20.0, minus.evaluate())
     }
 
@@ -38,24 +38,12 @@ class FormulaEvaluatorTest {
 
     @Test
     fun testEvaluateComplexFormula() {
-        val negatedPositiveConstant = UnaryFormula(UnaryOperator.MINUS, positiveConstant)
-        val negativeAdd = BinaryFormula(
-            negatedPositiveConstant,
-            BinaryOperator.ADD,
-            negativeConstant
-        )
+        val negatedPositiveConstant = -positiveConstant
+        val negativeAdd = negatedPositiveConstant + negativeConstant
         assertEquals(-30.0, negativeAdd.evaluate())
-        val negativeMultiply = BinaryFormula(
-            negatedPositiveConstant,
-            BinaryOperator.MULTIPLY,
-            negativeConstant
-        )
+        val negativeMultiply = negatedPositiveConstant * negativeConstant
         assertEquals(200.0, negativeMultiply.evaluate())
-        val complexFormula = BinaryFormula(
-            negativeAdd,
-            BinaryOperator.SUBTRACT,
-            negativeMultiply
-        )
+        val complexFormula = negativeAdd - negativeMultiply
         assertEquals(-230.0, complexFormula.evaluate())
     }
 }

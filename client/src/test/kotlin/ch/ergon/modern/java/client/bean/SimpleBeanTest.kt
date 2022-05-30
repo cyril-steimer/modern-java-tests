@@ -54,4 +54,15 @@ class SimpleBeanTest {
             subscriber.notify(Notification(feature = "neverNull", oldValue = 20.0, newValue = 10.0))
         }
     }
+
+    @Test
+    fun testGetAndSetByName() {
+        bean.setValue("canBeNull", 10.0)
+        assertEquals(10.0, bean.getValue("canBeNull"))
+        assertEquals(10.0, bean.canBeNull)
+
+        bean.setValue("canBeNull", null)
+        assertNull(bean.getValue("canBeNull"))
+        assertNull(bean.canBeNull)
+    }
 }

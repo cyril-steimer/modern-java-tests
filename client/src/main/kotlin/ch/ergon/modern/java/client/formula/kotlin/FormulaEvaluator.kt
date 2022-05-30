@@ -2,11 +2,14 @@ package ch.ergon.modern.java.client.formula.kotlin
 
 import ch.ergon.modern.java.api.formula.kotlin.*
 
-fun Formula.evaluate(): Double = when (this) {
+fun Formula.evaluate(variables: Map<String, Double>): Double = when (this) {
     is Constant -> value
     is BinaryFormula -> evaluate()
     is UnaryFormula -> evaluate()
+    is Variable -> variables[name] ?: throw IllegalStateException("Undefined value for variable '$name'")
 }
+
+fun Formula.evaluate(): Double = evaluate(emptyMap())
 
 private fun BinaryFormula.evaluate(): Double = when (operator) {
     BinaryOperator.ADD -> leftSide.evaluate() + rightSide.evaluate()

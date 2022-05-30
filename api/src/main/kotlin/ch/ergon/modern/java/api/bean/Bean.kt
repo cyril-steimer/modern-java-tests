@@ -27,13 +27,15 @@ abstract class Bean {
         subscribers += subscriber
     }
 
-    fun setValue(property: String, value: Any?) {
-        getProperty(property)?.setValue(value)
+    operator fun set(property: BeanProperty, value: Any?) = set(property.name, value)
+
+    operator fun set(propertyName: String, value: Any?) {
+        getProperty(propertyName)?.setValue(value)
     }
 
-    fun getValue(property: String): Any? {
-        return getProperty(property)?.value
-    }
+    operator fun get(property: BeanProperty): Any? = get(property.name)
+
+    operator fun get(propertyName: String): Any? = getProperty(propertyName)?.value
 
     fun getBeanProperty(name: String): BeanProperty? = getProperty(name)?.beanProperty
 
@@ -42,6 +44,27 @@ abstract class Bean {
     }
 
     private fun getProperty(name: String) = properties.find { it.beanProperty.name == name }
+
+    override fun toString(): String {
+        val properties = properties.joinToString(separator = ",") { "${it.beanProperty.name} = ${it.value}" }
+        return "${javaClass.simpleName}($properties)"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other == null) {
+            return false
+        }
+        if (other::class == this::class) {
+            val otherBean = other as Bean
+            return propertyValues.contentEquals(otherBean.propertyValues)
+        }
+        return false
+    }
+
+    override fun hashCode(): Int = propertyValues.contentHashCode()
+
+    private val propertyValues: Array<Any?>
+        get() = properties.map { it.value }.toTypedArray()
 
     // Is there a way to make this class less visible?
     class NotifyingPropertyDelegateProvider<T>(private val initialValue: T) {
@@ -54,7 +77,7 @@ abstract class Bean {
     }
 
     private class NotifyingPropertyDelegate<T>(
-        initialValue: T, private val bean: Bean, private val property: KProperty<*>, val beanProperty: BeanProperty
+            initialValue: T, private val bean: Bean, private val property: KProperty<*>, val beanProperty: BeanProperty
     ) : ReadWriteProperty<Bean, T> {
         private var _value: T = initialValue
 

@@ -4,8 +4,7 @@ import ch.ergon.modern.java.api.bean.Notification
 import ch.ergon.modern.java.api.bean.Subscriber
 import io.mockk.mockk
 import io.mockk.verifySequence
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -58,19 +57,36 @@ class SimpleBeanTest {
 
     @Test
     fun testGetAndSetByName() {
-        bean.setValue("canBeNull", 10.0)
-        assertEquals(10.0, bean.getValue("canBeNull"))
+        bean["canBeNull"] = 10.0
+        assertEquals(10.0, bean["canBeNull"])
         assertEquals(10.0, bean.canBeNull)
 
-        bean.setValue("canBeNull", null)
-        assertNull(bean.getValue("canBeNull"))
+        bean["canBeNull"] = null
+        assertNull(bean["canBeNull"])
         assertNull(bean.canBeNull)
     }
 
     @Test
     fun testTypeChecksOnSetByName() {
-        assertThrows<ClassCastException> { bean.setValue("canBeNull", "notADouble") }
+        assertThrows<ClassCastException> { bean["canBeNull"] = "notADouble" }
 
-        assertThrows<NullPointerException> { bean.setValue("neverNull", null) }
+        assertThrows<NullPointerException> { bean["neverNull"] = null }
+    }
+
+    @Test
+    fun testEquals() {
+        val bean1 = SimpleBean(initialValue = 20.0)
+        val bean2 = SimpleBean(initialValue = 20.0)
+
+        assertEquals(bean1, bean2)
+
+        bean1.canBeNull = 10.0
+        assertNotEquals(bean1, bean2)
+
+        bean2.canBeNull = 10.0
+        assertEquals(bean1, bean2)
+
+        bean1.neverNull = 30.0
+        assertNotEquals(bean1, bean2)
     }
 }

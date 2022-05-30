@@ -51,6 +51,8 @@ subprojects {
     dependencies {
         testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = junitVersion)
         testRuntimeOnly(group = "org.junit.jupiter", name = "junit-jupiter-engine", version = junitVersion)
+
+        testImplementation(group = "io.mockk", name = "mockk", version = "1.12.4")
     }
 
     tasks.test {

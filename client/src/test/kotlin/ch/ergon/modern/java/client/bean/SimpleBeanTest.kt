@@ -7,6 +7,7 @@ import io.mockk.verifySequence
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class SimpleBeanTest {
 
@@ -64,5 +65,12 @@ class SimpleBeanTest {
         bean.setValue("canBeNull", null)
         assertNull(bean.getValue("canBeNull"))
         assertNull(bean.canBeNull)
+    }
+
+    @Test
+    fun testTypeChecksOnSetByName() {
+        assertThrows<ClassCastException> { bean.setValue("canBeNull", "notADouble") }
+
+        assertThrows<NullPointerException> { bean.setValue("neverNull", null) }
     }
 }

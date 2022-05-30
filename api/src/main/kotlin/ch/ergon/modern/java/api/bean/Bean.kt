@@ -1,12 +1,22 @@
 package ch.ergon.modern.java.api.bean
 
 import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
 data class Notification<T>(val feature: String, val oldValue: T, val newValue: T)
 
 interface Subscriber {
     fun notify(notification: Notification<*>)
+}
+
+data class BeanProperty(val name: String, val isNullable: Boolean, val type: KClass<*>) {
+    fun checkAssignable(value: Any?) {
+        when {
+            !isNullable && value == null -> throw NullPointerException("Null not supported for '$name'")
+            value != null && !type.isInstance(value) -> throw ClassCastException("Invalid value for '$name'")
+        }
+    }
 }
 
 abstract class Bean {
@@ -25,23 +35,26 @@ abstract class Bean {
         return getProperty(property)?.value
     }
 
+    fun getBeanProperty(name: String): BeanProperty? = getProperty(name)?.beanProperty
+
     private fun notifyAll(notification: Notification<*>) {
         subscribers.forEach { it.notify(notification) }
     }
 
-    private fun getProperty(name: String) = properties.find { it.property.name == name }
+    private fun getProperty(name: String) = properties.find { it.beanProperty.name == name }
 
     // Is there a way to make this class less visible?
     class NotifyingPropertyDelegateProvider<T>(private val initialValue: T) {
         operator fun provideDelegate(thisRef: Bean, property: KProperty<*>): ReadWriteProperty<Bean, T> {
-            val delegate = NotifyingPropertyDelegate(initialValue, thisRef, property)
+            val beanProperty = property.beanProperty ?: throw AssertionError("Invalid property '${property.name}'")
+            val delegate = NotifyingPropertyDelegate(initialValue, thisRef, property, beanProperty)
             thisRef.properties += delegate
             return delegate
         }
     }
 
     private class NotifyingPropertyDelegate<T>(
-        initialValue: T, val bean: Bean, val property: KProperty<*>
+        initialValue: T, private val bean: Bean, private val property: KProperty<*>, val beanProperty: BeanProperty
     ) : ReadWriteProperty<Bean, T> {
         private var _value: T = initialValue
 
@@ -56,13 +69,20 @@ abstract class Bean {
             setValue(value)
         }
 
+        @Suppress("UNCHECKED_CAST")
         fun setValue(value: Any?) {
+            beanProperty.checkAssignable(value)
             val oldValue = this.value
-            this._value = value as T // Is there any way to make this a checked cast?
+            this._value = value as T // Cast is safe thanks to 'checkAssignable'
             bean.notifyAll(Notification(feature = property.name, oldValue = oldValue, newValue = value))
         }
     }
 }
+
+private val KProperty<*>.beanProperty: BeanProperty?
+    get() = (returnType.classifier as? KClass<*>)?.let {
+        BeanProperty(name, returnType.isMarkedNullable, it)
+    }
 
 fun <T> beanProperty() = Bean.NotifyingPropertyDelegateProvider<T?>(initialValue = null)
 

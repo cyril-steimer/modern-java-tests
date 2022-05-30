@@ -49,6 +49,8 @@ subprojects {
     version = "1.0"
 
     dependencies {
+        implementation(group = "org.jetbrains.kotlin", name="kotlin-reflect", version="1.6.21")
+
         testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = junitVersion)
         testRuntimeOnly(group = "org.junit.jupiter", name = "junit-jupiter-engine", version = junitVersion)
 

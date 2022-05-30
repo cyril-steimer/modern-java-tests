@@ -1,5 +1,6 @@
 package ch.ergon.modern.java.api.bean
 
+import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
 data class Notification(val feature: String, val oldValue: Any?, val newValue: Any?)
@@ -21,19 +22,22 @@ abstract class Notifier {
     }
 }
 
-class NotifyingPropertyDelegate<T>(initialValue: T) {
+private class NotifyingPropertyDelegate<T>(initialValue: T) : ReadWriteProperty<Notifier, T> {
     private var value: T = initialValue
 
-    operator fun getValue(thisRef: Notifier, property: KProperty<*>): T {
+    override fun getValue(thisRef: Notifier, property: KProperty<*>): T {
         return value
     }
 
-    operator fun setValue(thisRef: Notifier, property: KProperty<*>, value: T) {
+    override fun setValue(thisRef: Notifier, property: KProperty<*>, value: T) {
         val oldValue = this.value
         this.value = value
         thisRef.notifyAll(Notification(feature = property.name, oldValue = oldValue, newValue = value))
     }
 }
 
-fun <T> notifying() = NotifyingPropertyDelegate<T?>(initialValue = null)
-fun <T> notifying(initialValue: T) = NotifyingPropertyDelegate(initialValue = initialValue)
+fun <T> notifying(): ReadWriteProperty<Notifier, T?> =
+    NotifyingPropertyDelegate(initialValue = null)
+
+fun <T> notifying(initialValue: T): ReadWriteProperty<Notifier, T> =
+    NotifyingPropertyDelegate(initialValue = initialValue)

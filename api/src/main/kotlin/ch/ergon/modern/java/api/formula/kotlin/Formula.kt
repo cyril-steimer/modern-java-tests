@@ -1,5 +1,6 @@
 package ch.ergon.modern.java.api.formula.kotlin
 
+import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 sealed interface Formula
@@ -32,8 +33,8 @@ operator fun Formula.div(other: Formula) = BinaryFormula(this, BinaryOperator.DI
 operator fun Formula.unaryMinus() = UnaryFormula(UnaryOperator.MINUS, this)
 operator fun Formula.unaryPlus() = UnaryFormula(UnaryOperator.PLUS, this)
 
-class VariableDelegate {
-    operator fun getValue(thisRef: Any?, property: KProperty<*>) = Variable(property.name)
+private class VariableDelegate : ReadOnlyProperty<Any?, Variable> {
+    override fun getValue(thisRef: Any?, property: KProperty<*>) = Variable(property.name)
 }
 
-fun variable() = VariableDelegate()
+fun variable(): ReadOnlyProperty<Any?, Variable> = VariableDelegate()

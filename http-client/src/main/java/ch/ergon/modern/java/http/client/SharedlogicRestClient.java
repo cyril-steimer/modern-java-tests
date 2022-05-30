@@ -1,6 +1,8 @@
 package ch.ergon.modern.java.http.client;
 
 import java.io.IOException;
+import java.net.CookieManager;
+import java.net.HttpCookie;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -9,11 +11,14 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
+import java.util.Optional;
 
 public class SharedlogicRestClient {
 
     private final Host host;
     private final User user;
+
+    private final CookieManager cookieManager = new CookieManager();
 
     private final HttpClient client = HttpClient.newBuilder()
             .sslContext(new TrustEverythingSslContextFactory().create())
@@ -24,6 +29,7 @@ public class SharedlogicRestClient {
 //                        return new PasswordAuthentication(user.username(), user.password().toCharArray());
 //                    }
 //                })
+            .cookieHandler(cookieManager)
             .build();
 
     public SharedlogicRestClient(Host host, User user) {
@@ -38,15 +44,16 @@ public class SharedlogicRestClient {
         client.setDatapointValue(location, now.format(DateTimeFormatter.ISO_DATE_TIME));
         var response = client.getStringResponse(location);
         System.out.println(response);
+
+        client.setDatapointValue(location, "Reset...");
     }
 
     public String getStringResponse(String path) throws IOException, InterruptedException {
-        var request = HttpRequest.newBuilder()
+        var builder = HttpRequest.newBuilder()
                 .uri(URI.create(host.getFullUri(path)))
-                .header("Authorization", getBasicAuthHeader())
-                .GET()
-                .build();
-        var response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                .GET();
+        authenticate(builder);
+        var response = client.send(builder.build(), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         var statusCode = response.statusCode();
         if (statusCode == 200) {
             return response.body();
@@ -60,12 +67,11 @@ public class SharedlogicRestClient {
                     "value": "%s"
                 }
                 """.formatted(value);
-        var request = HttpRequest.newBuilder()
+        var builder = HttpRequest.newBuilder()
                 .uri(URI.create(host.getFullUri(path)))
-                .header("Authorization", getBasicAuthHeader())
-                .PUT(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8))
-                .build();
-        var response = client.send(request, HttpResponse.BodyHandlers.discarding());
+                .PUT(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8));
+        authenticate(builder);
+        var response = client.send(builder.build(), HttpResponse.BodyHandlers.discarding());
         var statusCode = response.statusCode();
         if (statusCode != 200) {
             throw new IOException("Unexpected response code: " + statusCode);
@@ -73,9 +79,26 @@ public class SharedlogicRestClient {
     }
 
     private String getBasicAuthHeader() {
-        // Unlike the HTTP Client from Apache there seems to be no other way than setting the Basic auth header ourselves
+        // Unlike the HTTP Client from Apache there seems to be no other way than setting the Basic Auth header ourselves
         var usernamePassword = user.username() + ":" + user.password();
         return "Basic " + Base64.getEncoder().encodeToString(usernamePassword.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private void authenticate(HttpRequest.Builder requestBuilder) {
+        // Note: Using cookies here only serves as an example (always using Basic Auth would be easier)
+        Optional<String> xsrfToken = getCookieValue("XSRF-TOKEN");
+        if (xsrfToken.isPresent()) {
+            requestBuilder.header("X-XSRF-TOKEN", xsrfToken.get());
+        } else {
+            requestBuilder.header("Authorization", getBasicAuthHeader());
+        }
+    }
+
+    private Optional<String> getCookieValue(String name) {
+        return cookieManager.getCookieStore().getCookies().stream()
+                .filter(cookie -> name.equals(cookie.getName()))
+                .map(HttpCookie::getValue)
+                .findAny();
     }
 
     public enum Scheme {
